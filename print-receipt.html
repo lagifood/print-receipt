@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk Pembayaran - Ayam Bakar Aroma</title>
+    <style>
+        /* Pengaturan Kertas Printer Thermal 58mm */
+        @page {
+            size: 58mm auto;
+            margin: 0;
+        }
+        body {
+            width: 58mm;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            color: #000;
+            margin: 0;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: bold; }
+        .line {
+            border-bottom: 1px dashed #000;
+            margin: 6px 0;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .item-list {
+            margin: 4px 0;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+        }
+        /* Sembunyikan tombol di layar cetak */
+        @media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center bold" style="font-size: 13px;">AYAM BAKAR AROMA</div>
+    <div class="text-center">Nota Pembayaran</div>
+    <div class="line"></div>
+
+    <div class="row">
+        <span>No. Order:</span>
+        <span id="order_id" class="bold">-</span>
+    </div>
+    <div class="row">
+        <span>Tanggal:</span>
+        <span id="tanggal">-</span>
+    </div>
+    <div class="row">
+        <span>Pelanggan:</span>
+        <span id="pelanggan">-</span>
+    </div>
+    <div class="row">
+        <span>Metode:</span>
+        <span id="metode">-</span>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="bold">Rincian Pesanan:</div>
+    <div id="items-container" class="item-list">
+        </div>
+
+    <div class="line"></div>
+
+    <div class="row bold" style="font-size: 12px;">
+        <span>TOTAL BAYAR:</span>
+        <span id="total_bayar">Rp 0</span>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="text-center" style="margin-top: 8px;">
+        *** TERIMA KASIH ***<br>
+        Selamat Menikmati
+    </div>
+
+    <div class="no-print text-center" style="margin-top: 15px;">
+        <button onclick="window.print()" style="padding: 5px 10px; cursor: pointer;">Cetak Struk</button>
+    </div>
+
+    <script>
+        // Fungsi membaca parameter URL dari AppSheet
+        const params = new URLSearchParams(window.location.search);
+
+        document.getElementById('order_id').innerText = params.get('order_id') || '-';
+        document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
+        document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
+        document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
+
+        // Format Angka Rupiah
+        function formatRupiah(angka) {
+            const val = parseInt(angka) || 0;
+            return 'Rp ' + val.toLocaleString('id-ID');
+        }
+
+        document.getElementById('total_bayar').innerText = formatRupiah(params.get('total'));
+
+        // Parsing Rincian Item (Format parameter items: Nama|Qty|Harga,Nama|Qty|Harga)
+        const itemsParam = params.get('items');
+        const itemsContainer = document.getElementById('items-container');
+
+        if (itemsParam) {
+            const itemsList = itemsParam.split(',');
+            itemsList.forEach(itemStr => {
+                const parts = itemStr.split('|');
+                if (parts.length >= 3) {
+                    const nama = parts[0];
+                    const qty = parts[1];
+                    const subtotal = parts[2];
+
+                    const div = document.createElement('div');
+                    div.style.marginBottom = '4px';
+                    div.innerHTML = `
+                        <div>${nama}</div>
+                        <div class="item-row">
+                            <span>  ${qty} x</span>
+                            <span>${formatRupiah(subtotal)}</span>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(div);
+                }
+            });
+        } else {
+            itemsContainer.innerHTML = '<div>- Tidak ada detail item -</div>';
+        }
+
+        // Pemicu Dialog Print Otomatis saat Halaman Selesai Dimuat
+        window.onload = function() {
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
