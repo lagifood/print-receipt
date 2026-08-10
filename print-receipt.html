@@ -120,7 +120,7 @@
     }
 
     // Menampilkan Total Harga, Total Bayar, dan Kembalian
-    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
+    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga'));
     document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
     document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
 
