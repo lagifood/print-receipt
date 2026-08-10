@@ -101,57 +101,66 @@
     </div>
 
     <script>
-        // Fungsi membaca parameter URL dari AppSheet
-        const params = new URLSearchParams(window.location.search);
+    // Fungsi membaca parameter URL
+    const params = new URLSearchParams(window.location.search);
 
-        document.getElementById('order_id').innerText = params.get('order_id') || '-';
-        document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
-        document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
-        document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
+    // Ambil order_id
+    const orderId = params.get('order_id') || params.get('id') || '-';
 
-        // Format Angka Rupiah
-        function formatRupiah(angka) {
-            const val = parseInt(angka) || 0;
-            return 'Rp ' + val.toLocaleString('id-ID');
-        }
+    // Pengisian data ke ID elemen HTML
+    document.getElementById('id_order').innerText = orderId;
+    document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
+    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
+    document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
 
-        document.getElementById('total_bayar').innerText = formatRupiah(params.get('total'));
+    // Format Angka Rupiah
+    function formatRupiah(angka) {
+        const val = parseInt(angka) || 0;
+        return 'Rp ' + val.toLocaleString('id-ID');
+    }
 
-        // Parsing Rincian Item (Format parameter items: Nama|Qty|Harga,Nama|Qty|Harga)
-        const itemsParam = params.get('items');
-        const itemsContainer = document.getElementById('items-container');
+    // Menampilkan Total Harga, Total Bayar, dan Kembalian
+    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
+    document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
+    document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
 
-        if (itemsParam) {
-            const itemsList = itemsParam.split(',');
-            itemsList.forEach(itemStr => {
-                const parts = itemStr.split('|');
-                if (parts.length >= 3) {
-                    const nama = parts[0];
-                    const qty = parts[1];
-                    const subtotal = parts[2];
+    // Parsing Rincian Item (Format: Nama|Qty|Harga,Nama|Qty|Harga)
+    const itemsParam = params.get('items');
+    const itemsContainer = document.getElementById('items-container');
 
-                    const div = document.createElement('div');
-                    div.style.marginBottom = '4px';
-                    div.innerHTML = `
-                        <div>${nama}</div>
-                        <div class="item-row">
-                            <span>  ${qty} x</span>
-                            <span>${formatRupiah(subtotal)}</span>
-                        </div>
-                    `;
-                    itemsContainer.appendChild(div);
-                }
-            });
-        } else {
-            itemsContainer.innerHTML = '<div>- Tidak ada detail item -</div>';
-        }
+    if (itemsParam) {
+        const itemsList = itemsParam.split(',');
+        itemsContainer.innerHTML = ''; // bersihkan kontainer
+        
+        itemsList.forEach(itemStr => {
+            const parts = itemStr.split('|');
+            if (parts.length >= 3) {
+                const nama = parts[0].trim();
+                const qty = parts[1].trim();
+                const subtotal = parts[2].trim();
 
-        // Pemicu Dialog Print Otomatis saat Halaman Selesai Dimuat
-        window.onload = function() {
-            setTimeout(() => {
-                window.print();
-            }, 500);
-        };
+                const div = document.createElement('div');
+                div.style.marginBottom = '4px';
+                div.innerHTML = `
+                    <div>${nama}</div>
+                    <div class="item-row">
+                        <span>  ${qty} x</span>
+                        <span>${formatRupiah(subtotal)}</span>
+                    </div>
+                `;
+                itemsContainer.appendChild(div);
+            }
+        });
+    } else {
+        itemsContainer.innerHTML = '<div>- Tidak ada detail item -</div>';
+    }
+
+    // Pemicu Dialog Print Otomatis
+    window.onload = function() {
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    };
     </script>
 </body>
 </html>
