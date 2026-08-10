@@ -101,36 +101,43 @@
     </div>
 
     <script>
-    // Fungsi membaca parameter URL
     const params = new URLSearchParams(window.location.search);
 
-    // Ambil order_id
+    // 1. Ambil No. Order (Mendukung nama 'order_id' maupun 'id')
     const orderId = params.get('order_id') || params.get('id') || '-';
+    
+    // 2. Tampilkan ke HTML (Menggunakan ID yang sesuai dengan HTML Anda)
+    if(document.getElementById('id_order')) document.getElementById('id_order').innerText = orderId;
+    if(document.getElementById('order_id')) document.getElementById('order_id').innerText = orderId;
 
-    // Pengisian data ke ID elemen HTML
-    document.getElementById('id_order').innerText = orderId;
     document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
-    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
-    document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
+    
+    // Cek ID nama pelanggan
+    if(document.getElementById('nama_pelanggan')) document.getElementById('nama_pelanggan').innerText = params.get('pelanggan') || '-';
+    if(document.getElementById('pelanggan')) document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
 
-    // Format Angka Rupiah
+    // Cek ID metode pembayaran
+    if(document.getElementById('metode_pembayaran')) document.getElementById('metode_pembayaran').innerText = params.get('metode') || 'Tunai';
+    if(document.getElementById('metode')) document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
+
+    // Format Rupiah
     function formatRupiah(angka) {
         const val = parseInt(angka) || 0;
         return 'Rp ' + val.toLocaleString('id-ID');
     }
 
-    // Menampilkan Total Harga, Total Bayar, dan Kembalian
-    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga'));
-    document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
-    document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
+    // 3. Tampilkan Total Harga, Total Bayar, dan Kembalian
+    if(document.getElementById('total_harga')) document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
+    if(document.getElementById('total_bayar')) document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
+    if(document.getElementById('kembalian')) document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
 
-    // Parsing Rincian Item (Format: Nama|Qty|Harga,Nama|Qty|Harga)
+    // 4. Render Rincian Barang
     const itemsParam = params.get('items');
     const itemsContainer = document.getElementById('items-container');
 
-    if (itemsParam) {
+    if (itemsParam && itemsContainer) {
         const itemsList = itemsParam.split(',');
-        itemsContainer.innerHTML = ''; // bersihkan kontainer
+        itemsContainer.innerHTML = '';
         
         itemsList.forEach(itemStr => {
             const parts = itemStr.split('|');
@@ -151,16 +158,14 @@
                 itemsContainer.appendChild(div);
             }
         });
-    } else {
-        itemsContainer.innerHTML = '<div>- Tidak ada detail item -</div>';
     }
 
-    // Pemicu Dialog Print Otomatis
+    // Auto Print
     window.onload = function() {
         setTimeout(() => {
             window.print();
         }, 500);
     };
-    </script>
+</script>
 </body>
 </html>
