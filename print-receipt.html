@@ -71,12 +71,21 @@
     <div class="line"></div>
 
     <div class="bold">Rincian Pesanan:</div>
-    <div id="items-container" class="item-list">
-        </div>
+    <div id="items-container" class="item-list"></div>
 
-   <div class="line"></div>
+    <div class="line"></div>
 
-    <div class="row bold" style="font-size: 12px;">
+    <!-- Section Perhitungan Harga & Promo -->
+    <div class="row">
+        <span>Subtotal:</span>
+        <span id="subtotal">Rp 0</span>
+    </div>
+    <div id="promo-row" class="row" style="display: none;">
+        <span id="label_promo">Potongan Promo:</span>
+        <span id="potongan">-Rp 0</span>
+    </div>
+
+    <div class="row bold" style="font-size: 12px; margin-top: 2px;">
         <span>Total Harga:</span>
         <span id="total_harga">Rp 0</span>
     </div>
@@ -103,35 +112,46 @@
     <script>
     const params = new URLSearchParams(window.location.search);
 
-    // 1. Ambil No. Order (Mendukung nama 'order_id' maupun 'id')
+    // 1. Ambil No. Order
     const orderId = params.get('order_id') || params.get('id') || '-';
-    
-    // 2. Tampilkan ke HTML (Menggunakan ID yang sesuai dengan HTML Anda)
-    if(document.getElementById('id_order')) document.getElementById('id_order').innerText = orderId;
     if(document.getElementById('order_id')) document.getElementById('order_id').innerText = orderId;
 
+    // 2. Tanggal & Waktu
     document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
-    
-    // Cek ID nama pelanggan
-    if(document.getElementById('nama_pelanggan')) document.getElementById('nama_pelanggan').innerText = params.get('pelanggan') || '-';
-    if(document.getElementById('pelanggan')) document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
 
-    // Cek ID metode pembayaran
-    if(document.getElementById('metode_pembayaran')) document.getElementById('metode_pembayaran').innerText = params.get('metode') || 'Tunai';
-    if(document.getElementById('metode')) document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
+    // 3. Pelanggan & Metode
+    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
+    document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
 
-    // Format Rupiah
+    // Format Rupiah Helper
     function formatRupiah(angka) {
         const val = parseInt(angka) || 0;
         return 'Rp ' + val.toLocaleString('id-ID');
     }
 
-    // 3. Tampilkan Total Harga, Total Bayar, dan Kembalian
-    if(document.getElementById('total_harga')) document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
-    if(document.getElementById('total_bayar')) document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
-    if(document.getElementById('kembalian')) document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
+    // 4. Render Subtotal, Promo & Total
+    const subtotalVal = parseInt(params.get('subtotal')) || 0;
+    const potonganVal = parseInt(params.get('potongan')) || 0;
+    const namaPromo = params.get('nama_promo') || '';
 
-    // 4. Render Rincian Barang
+    document.getElementById('subtotal').innerText = formatRupiah(subtotalVal);
+
+    // Tampilkan baris promo hanya jika ada potongan promo > 0
+    if (potonganVal > 0) {
+        const promoRow = document.getElementById('promo-row');
+        const labelPromo = document.getElementById('label_promo');
+        const potonganEl = document.getElementById('potongan');
+
+        promoRow.style.display = 'flex';
+        labelPromo.innerText = namaPromo ? `Promo (${namaPromo}):` : 'Potongan:';
+        potonganEl.innerText = '- ' + formatRupiah(potonganVal);
+    }
+
+    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
+    document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
+    document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
+
+    // 5. Render Rincian Barang
     const itemsParam = params.get('items');
     const itemsContainer = document.getElementById('items-container');
 
@@ -144,7 +164,7 @@
             if (parts.length >= 3) {
                 const nama = parts[0].trim();
                 const qty = parts[1].trim();
-                const subtotal = parts[2].trim();
+                const subtotalItem = parts[2].trim();
 
                 const div = document.createElement('div');
                 div.style.marginBottom = '4px';
@@ -152,7 +172,7 @@
                     <div>${nama}</div>
                     <div class="item-row">
                         <span>  ${qty} x</span>
-                        <span>${formatRupiah(subtotal)}</span>
+                        <span>${formatRupiah(subtotalItem)}</span>
                     </div>
                 `;
                 itemsContainer.appendChild(div);
