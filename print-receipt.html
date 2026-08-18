@@ -78,7 +78,7 @@
             border-color: #0056b3;
         }
 
-        /* Jangan tampilkan tombol saat pencetakan fisik/PDF */
+        /* Sembunyikan tombol aksi saat proses print berlangsung */
         @media print {
             .no-print { 
                 display: none !important; 
@@ -133,7 +133,7 @@
         Selamat Menikmati
     </div>
 
-    <!-- TOMBOL Aksi (Hanya Tampil di Layar) -->
+    <!-- TOMBOL AKSI -->
     <div class="no-print button-container">
         <button class="btn btn-primary" onclick="cetakOtomatis()">Cetak Struk</button>
         <button class="btn" onclick="window.print()">Print Manual (Windows)</button>
@@ -194,9 +194,7 @@
                 const qty = parts[1].trim();
                 const subtotalItem = parts[2].trim();
 
-                textItemsRaw += `${nama}
-  ${qty} x ${formatRupiah(subtotalItem)}
-`;
+                textItemsRaw += `${nama}\n  ${qty} x ${formatRupiah(subtotalItem)}\n`;
 
                 const div = document.createElement('div');
                 div.style.marginBottom = '4px';
@@ -219,47 +217,27 @@
         if (isAndroid) {
             // Format Plain Text ESC/POS untuk RawBT di Android
             let textToPrint = "";
-            textToPrint += "AYAM BAKAR AROMA
-";
-            textToPrint += "Nota Pembayaran
-";
-            textToPrint += "--------------------------------
-";
-            textToPrint += `No. Order: ${orderId}
-`;
-            textToPrint += `Tanggal  : ${tanggalStr}
-`;
-            textToPrint += `Pelanggan: ${pelanggan}
-`;
-            textToPrint += `Metode   : ${metode}
-`;
-            textToPrint += "--------------------------------
-";
-            textToPrint += "Rincian Pesanan:
-";
+            textToPrint += "AYAM BAKAR AROMA\n";
+            textToPrint += "Nota Pembayaran\n";
+            textToPrint += "--------------------------------\n";
+            textToPrint += `No. Order: ${orderId}\n`;
+            textToPrint += `Tanggal  : ${tanggalStr}\n`;
+            textToPrint += `Pelanggan: ${pelanggan}\n`;
+            textToPrint += `Metode   : ${metode}\n`;
+            textToPrint += "--------------------------------\n";
+            textToPrint += "Rincian Pesanan:\n";
             textToPrint += textItemsRaw;
-            textToPrint += "--------------------------------
-";
-            textToPrint += `Subtotal   : ${formatRupiah(subtotalVal)}
-`;
+            textToPrint += "--------------------------------\n";
+            textToPrint += `Subtotal   : ${formatRupiah(subtotalVal)}\n`;
             if (potonganVal > 0) {
-                textToPrint += `Potongan   : -${formatRupiah(potonganVal)}
-`;
+                textToPrint += `Potongan   : -${formatRupiah(potonganVal)}\n`;
             }
-            textToPrint += `Total Harga: ${formatRupiah(totalHargaVal)}
-`;
-            textToPrint += `Total Bayar: ${formatRupiah(totalBayarVal)}
-`;
-            textToPrint += `Kembalian  : ${formatRupiah(kembalianVal)}
-`;
-            textToPrint += "--------------------------------
-";
-            textToPrint += "       *** TERIMA KASIH ***
-";
-            textToPrint += "        Selamat Menikmati
-
-
-";
+            textToPrint += `Total Harga: ${formatRupiah(totalHargaVal)}\n`;
+            textToPrint += `Total Bayar: ${formatRupiah(totalBayarVal)}\n`;
+            textToPrint += `Kembalian  : ${formatRupiah(kembalianVal)}\n`;
+            textToPrint += "--------------------------------\n";
+            textToPrint += "       *** TERIMA KASIH ***\n";
+            textToPrint += "        Selamat Menikmati\n\n\n";
 
             const base64Data = btoa(unescape(encodeURIComponent(textToPrint)));
             
