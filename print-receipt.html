@@ -83,43 +83,110 @@
     </div>
 
     <script>
-    // Fungsi Pengiriman Cetak ke RawBT via Intent (Lebih Stabil di Chrome Android)
-function cetakBluetooth() {
-    let textToPrint = "";
-    textToPrint += "AYAM BAKAR AROMA\n";
-    textToPrint += "Nota Pembayaran\n";
-    textToPrint += "--------------------------------\n";
-    textToPrint += `No. Order: ${orderId}\n`;
-    textToPrint += `Tanggal  : ${tanggalStr}\n`;
-    textToPrint += `Pelanggan: ${pelanggan}\n`;
-    textToPrint += `Metode   : ${metode}\n`;
-    textToPrint += "--------------------------------\n";
-    textToPrint += "Rincian Pesanan:\n";
-    textToPrint += textItemsForRawBT;
-    textToPrint += "--------------------------------\n";
-    textToPrint += `Subtotal   : ${formatRupiah(subtotalVal)}\n`;
-    if (potonganVal > 0) {
-        textToPrint += `Potongan   : -${formatRupiah(potonganVal)}\n`;
+    const params = new URLSearchParams(window.location.search);
+
+    const orderId = params.get('order_id') || params.get('id') || '-';
+    const tanggalStr = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
+    const pelanggan = params.get('pelanggan') || '-';
+    const metode = params.get('metode') || 'Tunai';
+
+    document.getElementById('order_id').innerText = orderId;
+    document.getElementById('tanggal').innerText = tanggalStr;
+    document.getElementById('pelanggan').innerText = pelanggan;
+    document.getElementById('metode').innerText = metode;
+
+    function formatRupiah(angka) {
+        const val = parseInt(angka) || 0;
+        return 'Rp ' + val.toLocaleString('id-ID');
     }
-    textToPrint += `Total Harga: ${formatRupiah(totalHargaVal)}\n`;
-    textToPrint += `Total Bayar: ${formatRupiah(totalBayarVal)}\n`;
-    textToPrint += `Kembalian  : ${formatRupiah(kembalianVal)}\n`;
-    textToPrint += "--------------------------------\n";
-    textToPrint += "       *** TERIMA KASIH ***\n";
-    textToPrint += "        Selamat Menikmati\n\n\n";
 
-    const base64Data = btoa(unescape(encodeURIComponent(textToPrint)));
-    
-    // Gunakan Skema Intent Android agar tidak diblokir browser
-    window.location.href = "intent:#Intent;scheme=rawbt;package=ru.a404m.rawbtprint;S.base64=" + base64Data + ";end;";
-}
+    const subtotalVal = parseInt(params.get('subtotal')) || 0;
+    const potonganVal = parseInt(params.get('potongan')) || 0;
+    const namaPromo = params.get('nama_promo') || '';
 
-// Jalankan otomatis
-window.onload = function() {
-    setTimeout(() => {
-        cetakBluetooth();
-    }, 800);
-};
-</script>
+    document.getElementById('subtotal').innerText = formatRupiah(subtotalVal);
+
+    if (potonganVal > 0) {
+        document.getElementById('promo-row').style.display = 'flex';
+        document.getElementById('label_promo').innerText = namaPromo ? `Promo (${namaPromo}):` : 'Potongan:';
+        document.getElementById('potongan').innerText = '- ' + formatRupiah(potonganVal);
+    }
+
+    const totalHargaVal = parseInt(params.get('total_harga') || params.get('total')) || 0;
+    const totalBayarVal = parseInt(params.get('total_bayar')) || 0;
+    const kembalianVal = parseInt(params.get('kembalian')) || 0;
+
+    document.getElementById('total_harga').innerText = formatRupiah(totalHargaVal);
+    document.getElementById('total_bayar').innerText = formatRupiah(totalBayarVal);
+    document.getElementById('kembalian').innerText = formatRupiah(kembalianVal);
+
+    // Render Items
+    const itemsParam = params.get('items');
+    const itemsContainer = document.getElementById('items-container');
+    let textItemsForRawBT = '';
+
+    if (itemsParam && itemsContainer) {
+        const itemsList = itemsParam.split(',');
+        itemsContainer.innerHTML = '';
+        
+        itemsList.forEach(itemStr => {
+            const parts = itemStr.split('|');
+            if (parts.length >= 3) {
+                const nama = parts[0].trim();
+                const qty = parts[1].trim();
+                const subtotalItem = parts[2].trim();
+
+                textItemsForRawBT += `${nama}\n  ${qty} x ${formatRupiah(subtotalItem)}\n`;
+
+                const div = document.createElement('div');
+                div.style.marginBottom = '4px';
+                div.innerHTML = `
+                    <div>${nama}</div>
+                    <div class="item-row">
+                        <span>  ${qty} x</span>
+                        <span>${formatRupiah(subtotalItem)}</span>
+                    </div>
+                `;
+                itemsContainer.appendChild(div);
+            }
+        });
+    }
+
+    // Fungsi Pengiriman Cetak ke RawBT
+    function cetakBluetooth() {
+        let textToPrint = "";
+        textToPrint += "AYAM BAKAR AROMA\n";
+        textToPrint += "Nota Pembayaran\n";
+        textToPrint += "--------------------------------\n";
+        textToPrint += `No. Order: ${orderId}\n`;
+        textToPrint += `Tanggal  : ${tanggalStr}\n`;
+        textToPrint += `Pelanggan: ${pelanggan}\n`;
+        textToPrint += `Metode   : ${metode}\n`;
+        textToPrint += "--------------------------------\n";
+        textToPrint += "Rincian Pesanan:\n";
+        textToPrint += textItemsForRawBT;
+        textToPrint += "--------------------------------\n";
+        textToPrint += `Subtotal   : ${formatRupiah(subtotalVal)}\n`;
+        if (potonganVal > 0) {
+            textToPrint += `Potongan   : -${formatRupiah(potonganVal)}\n`;
+        }
+        textToPrint += `Total Harga: ${formatRupiah(totalHargaVal)}\n`;
+        textToPrint += `Total Bayar: ${formatRupiah(totalBayarVal)}\n`;
+        textToPrint += `Kembalian  : ${formatRupiah(kembalianVal)}\n`;
+        textToPrint += "--------------------------------\n";
+        textToPrint += "       *** TERIMA KASIH ***\n";
+        textToPrint += "        Selamat Menikmati\n\n\n";
+
+        // Mengarahkan ke protokol rawbt untuk cetak otomatis tanpa dialog
+        window.location.href = "rawbt:base64," + btoa(unescape(encodeURIComponent(textToPrint)));
+    }
+
+    // Eksekusi otomatis saat halaman dibuka dari AppSheet
+    window.onload = function() {
+        setTimeout(() => {
+            cetakBluetooth();
+        }, 600);
+    };
+    </script>
 </body>
 </html>
