@@ -3,30 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk Pembayaran - Ayam Bakar Aroma (USB 80mm)</title>
-    <!-- Library untuk Konversi Canvas & Koneksi USB via QZ Tray -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.2.4/qz-tray.min.js"></script>
-    
+    <title>Struk Pembayaran - Ayam Bakar Aroma</title>
     <style>
-        /* Pengaturan Layout Struk Asli Disesuaikan ke Skala Kertas 80mm */
+        /* Pengaturan Kertas Printer Thermal 80mm */
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
         body {
+            width: 80mm;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
+            font-size: 13px;
             color: #000;
             margin: 0;
             padding: 10px;
-            background-color: #f4f4f9;
-        }
-        #receipt-area {
-            width: 550px; /* Lebar optimal untuk rendering gambar printer 80mm */
-            padding: 12px;
-            background: #fff;
-            margin: 0 auto;
             box-sizing: border-box;
-            border: 1px solid #ddd;
         }
         .text-center { text-align: center; }
+        .text-right { text-align: right; }
         .bold { font-weight: bold; }
         .line {
             border-bottom: 1px dashed #000;
@@ -43,93 +37,79 @@
         .item-row {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
-        }
-        
-        .status-box {
-            max-width: 550px;
-            margin: 10px auto;
-            padding: 8px;
-            text-align: center;
-            font-family: sans-serif;
             font-size: 12px;
-            font-weight: bold;
-            border-radius: 4px;
-            background-color: #e2e3e5;
-            color: #383d41;
+        }
+        /* Sembunyikan tombol saat mencetak */
+        @media print {
+            .no-print { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div id="status" class="status-box">Menghubungkan ke QZ Tray...</div>
+    <div class="text-center bold" style="font-size: 16px;">AYAM BAKAR AROMA</div>
+    <div class="text-center" style="font-size: 12px;">Nota Pembayaran</div>
+    <div class="line"></div>
 
-    <!-- AREA STRUK DENGAN STRUKTUR & KODE ASLI ANDA -->
-    <div id="receipt-area">
-        <div class="text-center bold" style="font-size: 16px;">AYAM BAKAR AROMA</div>
-        <div class="text-center">Nota Pembayaran</div>
-        <div class="line"></div>
+    <div class="row">
+        <span>No. Order:</span>
+        <span id="order_id" class="bold">-</span>
+    </div>
+    <div class="row">
+        <span>Tanggal:</span>
+        <span id="tanggal">-</span>
+    </div>
+    <div class="row">
+        <span>Pelanggan:</span>
+        <span id="pelanggan">-</span>
+    </div>
+    <div class="row">
+        <span>Metode:</span>
+        <span id="metode">-</span>
+    </div>
 
-        <div class="row">
-            <span>No. Order:</span>
-            <span id="order_id" class="bold">-</span>
-        </div>
-        <div class="row">
-            <span>Tanggal:</span>
-            <span id="tanggal">-</span>
-        </div>
-        <div class="row">
-            <span>Pelanggan:</span>
-            <span id="pelanggan">-</span>
-        </div>
-        <div class="row">
-            <span>Metode:</span>
-            <span id="metode">-</span>
-        </div>
+    <div class="line"></div>
 
-        <div class="line"></div>
+    <div class="bold">Rincian Pesanan:</div>
+    <div id="items-container" class="item-list"></div>
 
-        <div class="bold">Rincian Pesanan:</div>
-        <div id="items-container" class="item-list"></div>
+    <div class="line"></div>
 
-        <div class="line"></div>
+    <!-- Section Perhitungan Harga & Promo -->
+    <div class="row">
+        <span>Subtotal:</span>
+        <span id="subtotal">Rp 0</span>
+    </div>
+    <div id="promo-row" class="row" style="display: none;">
+        <span id="label_promo">Potongan Promo:</span>
+        <span id="potongan">-Rp 0</span>
+    </div>
 
-        <!-- Section Perhitungan Harga & Promo -->
-        <div class="row">
-            <span>Subtotal:</span>
-            <span id="subtotal">Rp 0</span>
-        </div>
-        <div id="promo-row" class="row" style="display: none;">
-            <span id="label_promo">Potongan Promo:</span>
-            <span id="potongan">-Rp 0</span>
-        </div>
+    <div class="row bold" style="font-size: 14px; margin-top: 4px;">
+        <span>Total Harga:</span>
+        <span id="total_harga">Rp 0</span>
+    </div>
+    <div class="row">
+        <span>Total Bayar:</span>
+        <span id="total_bayar">Rp 0</span>
+    </div>
+    <div class="row">
+        <span>Kembalian:</span>
+        <span id="kembalian">Rp 0</span>
+    </div>
 
-        <div class="row bold" style="font-size: 15px; margin-top: 4px;">
-            <span>Total Harga:</span>
-            <span id="total_harga">Rp 0</span>
-        </div>
-        <div class="row">
-            <span>Total Bayar:</span>
-            <span id="total_bayar">Rp 0</span>
-        </div>
-        <div class="row">
-            <span>Kembalian:</span>
-            <span id="kembalian">Rp 0</span>
-        </div>
+    <div class="line"></div>
 
-        <div class="line"></div>
+    <div class="text-center" style="margin-top: 10px;">
+        *** TERIMA KASIH ***<br>
+        Selamat Menikmati
+    </div>
 
-        <div class="text-center" style="margin-top: 10px;">
-            *** TERIMA KASIH ***<br>
-            Selamat Menikmati
-            <br><br>
-        </div>
+    <div class="no-print text-center" style="margin-top: 20px;">
+        <button onclick="window.print()" style="padding: 8px 16px; font-size: 14px; cursor: pointer;">Cetak Struk</button>
     </div>
 
     <script>
-    // ** PENGATURAN NAMA PRINTER USB **
-    const PRINTER_NAME_USB = "CX-805"; 
-
     const params = new URLSearchParams(window.location.search);
 
     // 1. Ambil No. Order
@@ -186,7 +166,7 @@
                 const subtotalItem = parts[2].trim();
 
                 const div = document.createElement('div');
-                div.style.marginBottom = '4px';
+                div.style.marginBottom = '5px';
                 div.innerHTML = `
                     <div style="font-weight: bold;">${nama}</div>
                     <div class="item-row">
@@ -199,49 +179,11 @@
         });
     }
 
-    // MEKANISME OTOMATIS CETAK KE PRINTER USB VIA QZ TRAY
-    async function prosesCetakUSB() {
-        const statusDiv = document.getElementById('status');
-        try {
-            if (!qz.websocket.isActive()) {
-                await qz.websocket.connect();
-            }
-            statusDiv.innerText = "Terhubung. Mengirim ke printer CX-805...";
-            statusDiv.style.backgroundColor = "#cce5ff";
-
-            // Render area HTML struk menjadi gambar PNG beresolusi tinggi
-            const element = document.getElementById('receipt-area');
-            const canvas = await html2canvas(element, { scale: 2, backgroundColor: "#ffffff" });
-            const imgBase64 = canvas.toDataURL("image/png");
-
-            // Konfigurasi Printer USB & Kirim Data
-            const config = qz.configs.create(PRINTER_NAME_USB);
-            const printData = [{
-                type: 'pixel',
-                format: 'image',
-                flavor: 'base64',
-                data: imgBase64
-            }];
-
-            await qz.print(config, printData);
-            statusDiv.innerText = "✅ Struk Berhasil Dicetak!";
-            statusDiv.style.backgroundColor = "#d4edda";
-            statusDiv.style.color = "#155724";
-
-            // Tutup tab otomatis setelah sukses
-            setTimeout(() => { window.close(); }, 1500);
-
-        } catch (err) {
-            console.error(err);
-            statusDiv.innerText = "❌ Gagal Cetak: Pastikan QZ Tray aktif & nama printer 'CX-805' sesuai!";
-            statusDiv.style.backgroundColor = "#f8d7da";
-            statusDiv.style.color = "#721c24";
-        }
-    }
-
-    // Jalankan Otomatis
+    // Auto Print Saat Halaman Dibuka
     window.onload = function() {
-        setTimeout(prosesCetakUSB, 800);
+        setTimeout(() => {
+            window.print();
+        }, 500);
     };
     </script>
 </body>
