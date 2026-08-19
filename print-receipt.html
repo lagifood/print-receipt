@@ -4,21 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Pembayaran - Ayam Bakar Aroma</title>
-    <!-- Library untuk konversi HTML ke Gambar -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* CSS Disesuaikan 100% Persis Dengan Layout Asli Anda */
-        #receipt-area {
-            width: 576px !important; /* Standar lebar piksel kertas 80mm */
-            padding: 15px;
-            background: #fff;
-            box-sizing: border-box;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
@@ -27,89 +14,43 @@
             padding: 10px;
             background-color: #fff;
         }
-
-        /* Container Struk Khusus Cetak Gambar */
         #receipt-area {
-            width: 300px; /* Lebar standar kertas thermal thermal 58mm/80mm agar tidak terpotong */
-            padding: 10px;
+            width: 500px;
+            padding: 15px;
             background: #fff;
         }
-
-        .text-center { 
-            text-align: center; 
-        }
-
-        .bold { 
-            font-weight: bold; 
-        }
-
-        .line {
-            border-bottom: 1px dashed #000;
-            margin: 8px 0;
-        }
-
-        .row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            padding-left: 10px;
-        }
-
-        .item-title {
-            font-weight: bold;
-            margin-top: 4px;
-        }
-
-        .button-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 1px solid #000;
-            background-color: #f0f0f0;
-        }
+        .text-center { text-align: center; }
+        .bold { font-weight: bold; }
+        .line { border-bottom: 2px dashed #000; margin: 10px 0; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .item-row { display: flex; justify-content: space-between; font-size: 12px; padding-left: 10px; }
+        .item-title { font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- AREA STRUK (PERSIS DENGAN TAMPILAN ASLI ANDA) -->
     <div id="receipt-area">
-        <div class="text-center bold" style="font-size: 16px; margin-bottom: 2px;">AYAM BAKAR AROMA</div>
-        <div class="text-center" style="font-size: 12px;">Nota Pembayaran</div>
+        <div class="text-center bold" style="font-size: 18px;">AYAM BAKAR AROMA</div>
+        <div class="text-center" style="font-size: 13px;">Nota Pembayaran</div>
         <div class="line"></div>
 
-        <!-- INFORMASI TRANSAKSI -->
         <div class="row"><span>No. Order:</span><span id="order_id" class="bold">-</span></div>
         <div class="row"><span>Tanggal:</span><span id="tanggal">-</span></div>
         <div class="row"><span>Pelanggan:</span><span id="pelanggan">-</span></div>
         <div class="row"><span>Metode:</span><span id="metode">-</span></div>
 
         <div class="line"></div>
-
-        <!-- RINCIAN PESANAN -->
-        <div class="bold" style="margin-bottom: 4px;">Rincian Pesanan:</div>
+        <div class="bold">Rincian Pesanan:</div>
         <div id="items-container"></div>
 
         <div class="line"></div>
-
-        <!-- TOTAL DAN PEMBAYARAN -->
         <div class="row"><span>Subtotal:</span><span id="subtotal">Rp 0</span></div>
         <div id="promo-row" class="row" style="display: none;">
             <span id="label_promo">Potongan Promo:</span>
             <span id="potongan">-Rp 0</span>
         </div>
 
-        <div class="row bold" style="font-size: 14px; margin-top: 6px;">
+        <div class="row bold" style="font-size: 16px; margin-top: 6px;">
             <span>Total Harga:</span>
             <span id="total_harga">Rp 0</span>
         </div>
@@ -117,81 +58,52 @@
         <div class="row"><span>Kembalian:</span><span id="kembalian">Rp 0</span></div>
 
         <div class="line"></div>
-
-        <!-- FOOTER STRUK -->
-        <div class="text-center" style="margin-top: 10px; font-size: 12px;">
+        <div class="text-center" style="margin-top: 15px;">
             *** TERIMA KASIH ***<br>
             Selamat Menikmati
             <br><br>
         </div>
     </div>
 
-    <!-- TOMBOL CETAK MANUAL -->
-    <div class="button-container">
-        <button class="btn" onclick="cetakSebagaiGambar()">Cetak Struk</button>
-    </div>
-
     <script>
-    // 1. Ambil Parameter dari URL
     const params = new URLSearchParams(window.location.search);
-
-    const orderId = params.get('order_id') || params.get('id') || '-';
+    const orderId = params.get('order_id') || params.get('id') || 'STRUK';
     const tanggalStr = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
-    const pelanggan = params.get('pelanggan') || '-';
-    const metode = params.get('metode') || 'Tunai';
-
+    
     document.getElementById('order_id').innerText = orderId;
     document.getElementById('tanggal').innerText = tanggalStr;
-    document.getElementById('pelanggan').innerText = pelanggan;
-    document.getElementById('metode').innerText = metode;
+    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
+    document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
 
     function formatRupiah(angka) {
-        const val = parseInt(angka) || 0;
-        return 'Rp ' + val.toLocaleString('id-ID');
+        return 'Rp ' + (parseInt(angka) || 0).toLocaleString('id-ID');
     }
 
-    const subtotalVal = parseInt(params.get('subtotal')) || 0;
+    document.getElementById('subtotal').innerText = formatRupiah(params.get('subtotal'));
+    
     const potonganVal = parseInt(params.get('potongan')) || 0;
-    const namaPromo = params.get('nama_promo') || '';
-
-    document.getElementById('subtotal').innerText = formatRupiah(subtotalVal);
-
     if (potonganVal > 0) {
         document.getElementById('promo-row').style.display = 'flex';
-        document.getElementById('label_promo').innerText = namaPromo ? `Promo (${namaPromo}):` : 'Potongan:';
         document.getElementById('potongan').innerText = '- ' + formatRupiah(potonganVal);
     }
 
-    const totalHargaVal = parseInt(params.get('total_harga') || params.get('total')) || 0;
-    const totalBayarVal = parseInt(params.get('total_bayar')) || 0;
-    const kembalianVal = parseInt(params.get('kembalian')) || 0;
+    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
+    document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
+    document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
 
-    document.getElementById('total_harga').innerText = formatRupiah(totalHargaVal);
-    document.getElementById('total_bayar').innerText = formatRupiah(totalBayarVal);
-    document.getElementById('kembalian').innerText = formatRupiah(kembalianVal);
-
-    // 2. Render Rincian Pesanan
     const itemsParam = params.get('items');
     const itemsContainer = document.getElementById('items-container');
-
     if (itemsParam && itemsContainer) {
-        const itemsList = itemsParam.split(',');
         itemsContainer.innerHTML = '';
-        
-        itemsList.forEach(itemStr => {
+        itemsParam.split(',').forEach(itemStr => {
             const parts = itemStr.split('|');
             if (parts.length >= 3) {
-                const nama = parts[0].trim();
-                const qty = parts[1].trim();
-                const subtotalItem = parts[2].trim();
-
                 const div = document.createElement('div');
-                div.style.marginBottom = '4px';
                 div.innerHTML = `
-                    <div class="item-title">${nama}</div>
+                    <div class="item-title">${parts[0].trim()}</div>
                     <div class="item-row">
-                        <span>${qty} x</span>
-                        <span>${formatRupiah(subtotalItem)}</span>
+                        <span>${parts[1].trim()} x</span>
+                        <span>${formatRupiah(parts[2].trim())}</span>
                     </div>
                 `;
                 itemsContainer.appendChild(div);
@@ -199,25 +111,37 @@
         });
     }
 
-    // 3. Konversi Ke Gambar & Kirim Ke RawBT
-    function cetakSebagaiGambar() {
+    // KONVERSI KE FORMAT JPG & DIRECT INTENT KE RAWBT
+    function autoCetakFileGambarJPG() {
         const element = document.getElementById('receipt-area');
-    
-        html2canvas(element, { 
-            width: 576,         // Lebar presisi kertas 80mm
-            scale: 1,           // Menjaga ukuran piksel tetap stabil 1:1
-            backgroundColor: "#ffffff" 
-        }).then(canvas => {
-            const imgData = canvas.toDataURL("image/png").replace(/^data:image\/(png|jpg);base64,/, "");
-            window.location.href = "rawbt:base64/" + imgData;
+        
+        html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+            // Mengubah Canvas menjadi Format JPG (Quality 0.95)
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], `receipt_${orderId}.jpg`, { type: "image/jpeg" });
+
+                // Menggunakan Web Share / Intent API Native Android
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({
+                        files: [file],
+                        title: 'Cetak Struk',
+                        text: 'Mencetak Gambar JPG ke RawBT'
+                    }).catch(() => {});
+                } else {
+                    // Fallback Intent ke RawBT jika Share API tidak diizinkan
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = function() {
+                        const base64data = reader.result.split(',')[1];
+                        window.location.href = "intent:#Intent;scheme=rawbt;package=ru.a404m.rawbtprint;S.base64=" + base64data + ";end;";
+                    }
+                }
+            }, 'image/jpeg', 0.95);
         });
     }
 
-    // 4. Eksekusi Otomatis Setelah Halaman Siap
     window.onload = function() {
-        setTimeout(() => {
-            cetakSebagaiGambar();
-        }, 1000);
+        setTimeout(autoCetakFileGambarJPG, 1000);
     };
     </script>
 </body>
