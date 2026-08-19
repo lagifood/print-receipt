@@ -1,185 +1,188 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk Pembayaran - Ayam Bakar Aroma (USB Print)</title>
-    <!-- Library untuk Screenshot Layout & Koneksi USB via QZ Tray -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.2.4/qz-tray.min.js"></script>
-    
-    <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 13px;
-            color: #000;
-            margin: 0;
-            padding: 10px;
-            background-color: #f4f4f9;
-        }
-        #receipt-area {
-            width: 500px;
-            padding: 15px;
-            background: #fff;
-            margin: 0 auto;
-            border: 1px solid #ccc;
-        }
-        .text-center { text-align: center; }
-        .bold { font-weight: bold; }
-        .line { border-bottom: 2px dashed #000; margin: 10px 0; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .item-row { display: flex; justify-content: space-between; font-size: 12px; padding-left: 10px; }
-        .item-title { font-weight: bold; margin-top: 5px; }
-        
-        .status-box {
-            max-width: 500px;
-            margin: 15px auto;
-            padding: 10px;
-            text-align: center;
-            font-family: sans-serif;
-            font-weight: bold;
-            border-radius: 5px;
-            background-color: #e2e3e5;
-            color: #383d41;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk Pembayaran - Ayam Bakar Aroma</title>
+    <style>
+        /* Pengaturan Kertas Printer Thermal 58mm */
+        @page {
+            size: 58mm auto;
+            margin: 0;
+        }
+        body {
+            width: 58mm;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            color: #000;
+            margin: 0;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: bold; }
+        .line {
+            border-bottom: 1px dashed #000;
+            margin: 6px 0;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .item-list {
+            margin: 4px 0;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+        }
+        /* Sembunyikan tombol di layar cetak */
+        @media print {
+            .no-print { display: none; }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="status" class="status-box">Menghubungkan ke QZ Tray...</div>
+    <div class="text-center bold" style="font-size: 13px;">AYAM BAKAR AROMA</div>
+    <div class="text-center">Nota Pembayaran</div>
+    <div class="line"></div>
 
-    <div id="receipt-area">
-        <div class="text-center bold" style="font-size: 18px;">AYAM BAKAR AROMA</div>
-        <div class="text-center" style="font-size: 13px;">Nota Pembayaran</div>
-        <div class="line"></div>
+    <div class="row">
+        <span>No. Order:</span>
+        <span id="order_id" class="bold">-</span>
+    </div>
+    <div class="row">
+        <span>Tanggal:</span>
+        <span id="tanggal">-</span>
+    </div>
+    <div class="row">
+        <span>Pelanggan:</span>
+        <span id="pelanggan">-</span>
+    </div>
+    <div class="row">
+        <span>Metode:</span>
+        <span id="metode">-</span>
+    </div>
 
-        <div class="row"><span>No. Order:</span><span id="order_id" class="bold">-</span></div>
-        <div class="row"><span>Tanggal:</span><span id="tanggal">-</span></div>
-        <div class="row"><span>Pelanggan:</span><span id="pelanggan">-</span></div>
-        <div class="row"><span>Metode:</span><span id="metode">-</span></div>
+    <div class="line"></div>
 
-        <div class="line"></div>
-        <div class="bold">Rincian Pesanan:</div>
-        <div id="items-container"></div>
+    <div class="bold">Rincian Pesanan:</div>
+    <div id="items-container" class="item-list"></div>
 
-        <div class="line"></div>
-        <div class="row"><span>Subtotal:</span><span id="subtotal">Rp 0</span></div>
-        <div id="promo-row" class="row" style="display: none;">
-            <span id="label_promo">Potongan Promo:</span>
-            <span id="potongan">-Rp 0</span>
-        </div>
+    <div class="line"></div>
 
-        <div class="row bold" style="font-size: 16px; margin-top: 6px;">
-            <span>Total Harga:</span>
-            <span id="total_harga">Rp 0</span>
-        </div>
-        <div class="row"><span>Total Bayar:</span><span id="total_bayar">Rp 0</span></div>
-        <div class="row"><span>Kembalian:</span><span id="kembalian">Rp 0</span></div>
+    <!-- Section Perhitungan Harga & Promo -->
+    <div class="row">
+        <span>Subtotal:</span>
+        <span id="subtotal">Rp 0</span>
+    </div>
+    <div id="promo-row" class="row" style="display: none;">
+        <span id="label_promo">Potongan Promo:</span>
+        <span id="potongan">-Rp 0</span>
+    </div>
 
-        <div class="line"></div>
-        <div class="text-center" style="margin-top: 15px;">
-            *** TERIMA KASIH ***<br>
-            Selamat Menikmati
-            <br><br>
-        </div>
-    </div>
+    <div class="row bold" style="font-size: 12px; margin-top: 2px;">
+        <span>Total Harga:</span>
+        <span id="total_harga">Rp 0</span>
+    </div>
+    <div class="row">
+        <span>Total Bayar:</span>
+        <span id="total_bayar">Rp 0</span>
+    </div>
+    <div class="row">
+        <span>Kembalian:</span>
+        <span id="kembalian">Rp 0</span>
+    </div>
 
-    <script>
-    // ** PENGATURAN NAMA PRINTER USB ANDA **
-    // Ganti teks 'RPP02N' sesuai nama printer Anda di 'Control Panel -> Devices and Printers' Windows
-    const PRINTER_NAME_USB = "CX-805"; 
+    <div class="line"></div>
 
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get('order_id') || params.get('id') || 'STRUK';
-    const tanggalStr = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
-    
-    document.getElementById('order_id').innerText = orderId;
-    document.getElementById('tanggal').innerText = tanggalStr;
-    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
-    document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
+    <div class="text-center" style="margin-top: 8px;">
+        *** TERIMA KASIH ***<br>
+        Selamat Menikmati
+    </div>
 
-    function formatRupiah(angka) {
-        return 'Rp ' + (parseInt(angka) || 0).toLocaleString('id-ID');
-    }
+    <div class="no-print text-center" style="margin-top: 15px;">
+        <button onclick="window.print()" style="padding: 5px 10px; cursor: pointer;">Cetak Struk</button>
+    </div>
 
-    document.getElementById('subtotal').innerText = formatRupiah(params.get('subtotal'));
-    
-    const potonganVal = parseInt(params.get('potongan')) || 0;
-    if (potonganVal > 0) {
-        document.getElementById('promo-row').style.display = 'flex';
-        document.getElementById('potongan').innerText = '- ' + formatRupiah(potonganVal);
-    }
+    <script>
+    const params = new URLSearchParams(window.location.search);
 
-    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
-    document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
-    document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
+    // 1. Ambil No. Order
+    const orderId = params.get('order_id') || params.get('id') || '-';
+    if(document.getElementById('order_id')) document.getElementById('order_id').innerText = orderId;
 
-    const itemsParam = params.get('items');
-    const itemsContainer = document.getElementById('items-container');
-    if (itemsParam && itemsContainer) {
-        itemsContainer.innerHTML = '';
-        itemsParam.split(',').forEach(itemStr => {
-            const parts = itemStr.split('|');
-            if (parts.length >= 3) {
-                const div = document.createElement('div');
-                div.innerHTML = `
-                    <div class="item-title">${parts[0].trim()}</div>
-                    <div class="item-row">
-                        <span>${parts[1].trim()} x</span>
-                        <span>${formatRupiah(parts[2].trim())}</span>
-                    </div>
-                `;
-                itemsContainer.appendChild(div);
-            }
-        });
-    }
+    // 2. Tanggal & Waktu
+    document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
 
-    // FUNGSI OTOMATIS CETAK KE USB VIA QZ TRAY
-    async function prosesCetakUSB() {
-        const statusDiv = document.getElementById('status');
-        try {
-            // 1. Hubungkan ke QZ Tray
-            if (!qz.websocket.isActive()) {
-                await qz.websocket.connect();
-            }
-            statusDiv.innerText = "Terhubung ke QZ Tray. Memproses cetak...";
-            statusDiv.style.backgroundColor = "#cce5ff";
+    // 3. Pelanggan & Metode
+    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
+    document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
 
-            // 2. Render layout HTML struk menjadi Image Canvas
-            const element = document.getElementById('receipt-area');
-            const canvas = await html2canvas(element, { scale: 1.5, backgroundColor: "#ffffff" });
-            const imgBase64 = canvas.toDataURL("image/png");
+    // Format Rupiah Helper
+    function formatRupiah(angka) {
+        const val = parseInt(angka) || 0;
+        return 'Rp ' + val.toLocaleString('id-ID');
+    }
 
-            // 3. Konfigurasi Printer USB & Data Perintah Cetak
-            const config = qz.configs.create(PRINTER_NAME_USB);
-            const printData = [{
-                type: 'pixel',
-                format: 'image',
-                flavor: 'base64',
-                data: imgBase64
-            }];
+    // 4. Render Subtotal, Promo & Total
+    const subtotalVal = parseInt(params.get('subtotal')) || 0;
+    const potonganVal = parseInt(params.get('potongan')) || 0;
+    const namaPromo = params.get('nama_promo') || '';
 
-            // 4. Kirim langsung ke Printer USB
-            await qz.print(config, printData);
-            statusDiv.innerText = "✅ Struk Berhasil Dicetak!";
-            statusDiv.style.backgroundColor = "#d4edda";
-            statusDiv.style.color = "#155724";
+    document.getElementById('subtotal').innerText = formatRupiah(subtotalVal);
 
-            // Tutup tab otomatis setelah 2 detik
-            setTimeout(() => { window.close(); }, 2000);
+    // Tampilkan baris promo hanya jika ada potongan promo > 0
+    if (potonganVal > 0) {
+        const promoRow = document.getElementById('promo-row');
+        const labelPromo = document.getElementById('label_promo');
+        const potonganEl = document.getElementById('potongan');
 
-        } catch (err) {
-            console.error(err);
-            statusDiv.innerText = "❌ Gagal Cetak: Pastikan QZ Tray berjalan & nama printer sesuai!";
-            statusDiv.style.backgroundColor = "#f8d7da";
-            statusDiv.style.color = "#721c24";
-        }
-    }
+        promoRow.style.display = 'flex';
+        labelPromo.innerText = namaPromo ? `Promo (${namaPromo}):` : 'Potongan:';
+        potonganEl.innerText = '- ' + formatRupiah(potonganVal);
+    }
 
-    // Jalankan otomatis saat halaman dibuka dari AppSheet Web
-    window.onload = function() {
-        setTimeout(prosesCetakUSB, 1000);
-    };
-    </script>
-</body>
-</html>
+    document.getElementById('total_harga').innerText = formatRupiah(params.get('total_harga') || params.get('total'));
+    document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
+    document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
+
+    // 5. Render Rincian Barang
+    const itemsParam = params.get('items');
+    const itemsContainer = document.getElementById('items-container');
+
+    if (itemsParam && itemsContainer) {
+        const itemsList = itemsParam.split(',');
+        itemsContainer.innerHTML = '';
+        
+        itemsList.forEach(itemStr => {
+            const parts = itemStr.split('|');
+            if (parts.length >= 3) {
+                const nama = parts[0].trim();
+                const qty = parts[1].trim();
+                const subtotalItem = parts[2].trim();
+
+                const div = document.createElement('div');
+                div.style.marginBottom = '4px';
+                div.innerHTML = `
+                    <div>${nama}</div>
+                    <div class="item-row">
+                        <span>  ${qty} x</span>
+                        <span>${formatRupiah(subtotalItem)}</span>
+                    </div>
+                `;
+                itemsContainer.appendChild(div);
+            }
+        });
+    }
+
+    // Auto Print
+    window.onload = function() {
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    };
