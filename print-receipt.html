@@ -4,85 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Pembayaran - Ayam Bakar Aroma</title>
+    <!-- Library untuk konversi HTML ke Gambar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* Pengaturan Kertas Thermal 80mm */
+        /* CSS Disesuaikan 100% Persis Dengan Layout Asli Anda */
         @page {
             size: 80mm auto;
             margin: 0;
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            width: 80mm;
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
             color: #000;
             margin: 0;
             padding: 10px;
-            box-sizing: border-box;
+            background-color: #fff;
         }
-        .text-center { text-align: center; }
-        .bold { font-weight: bold; }
+
+        /* Container Struk Khusus Cetak Gambar */
+        #receipt-area {
+            width: 300px; /* Lebar standar kertas thermal thermal 58mm/80mm agar tidak terpotong */
+            padding: 10px;
+            background: #fff;
+        }
+
+        .text-center { 
+            text-align: center; 
+        }
+
+        .bold { 
+            font-weight: bold; 
+        }
+
         .line {
             border-bottom: 1px dashed #000;
-            margin: 6px 0;
+            margin: 8px 0;
         }
+
         .row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
+
         .item-row {
             display: flex;
             justify-content: space-between;
             font-size: 12px;
+            padding-left: 10px;
         }
-        @media print {
-            .no-print { display: none; }
+
+        .item-title {
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #000;
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
 
-    <div class="text-center bold" style="font-size: 16px;">AYAM BAKAR AROMA</div>
-    <div class="text-center">Nota Pembayaran</div>
-    <div class="line"></div>
+    <!-- AREA STRUK (PERSIS DENGAN TAMPILAN ASLI ANDA) -->
+    <div id="receipt-area">
+        <div class="text-center bold" style="font-size: 16px; margin-bottom: 2px;">AYAM BAKAR AROMA</div>
+        <div class="text-center" style="font-size: 12px;">Nota Pembayaran</div>
+        <div class="line"></div>
 
-    <div class="row"><span>No. Order:</span><span id="order_id" class="bold">-</span></div>
-    <div class="row"><span>Tanggal:</span><span id="tanggal">-</span></div>
-    <div class="row"><span>Pelanggan:</span><span id="pelanggan">-</span></div>
-    <div class="row"><span>Metode:</span><span id="metode">-</span></div>
+        <!-- INFORMASI TRANSAKSI -->
+        <div class="row"><span>No. Order:</span><span id="order_id" class="bold">-</span></div>
+        <div class="row"><span>Tanggal:</span><span id="tanggal">-</span></div>
+        <div class="row"><span>Pelanggan:</span><span id="pelanggan">-</span></div>
+        <div class="row"><span>Metode:</span><span id="metode">-</span></div>
 
-    <div class="line"></div>
+        <div class="line"></div>
 
-    <div class="bold">Rincian Pesanan:</div>
-    <div id="items-container"></div>
+        <!-- RINCIAN PESANAN -->
+        <div class="bold" style="margin-bottom: 4px;">Rincian Pesanan:</div>
+        <div id="items-container"></div>
 
-    <div class="line"></div>
+        <div class="line"></div>
 
-    <div class="row"><span>Subtotal:</span><span id="subtotal">Rp 0</span></div>
-    <div id="promo-row" class="row" style="display: none;">
-        <span id="label_promo">Potongan Promo:</span>
-        <span id="potongan">-Rp 0</span>
+        <!-- TOTAL DAN PEMBAYARAN -->
+        <div class="row"><span>Subtotal:</span><span id="subtotal">Rp 0</span></div>
+        <div id="promo-row" class="row" style="display: none;">
+            <span id="label_promo">Potongan Promo:</span>
+            <span id="potongan">-Rp 0</span>
+        </div>
+
+        <div class="row bold" style="font-size: 14px; margin-top: 6px;">
+            <span>Total Harga:</span>
+            <span id="total_harga">Rp 0</span>
+        </div>
+        <div class="row"><span>Total Bayar:</span><span id="total_bayar">Rp 0</span></div>
+        <div class="row"><span>Kembalian:</span><span id="kembalian">Rp 0</span></div>
+
+        <div class="line"></div>
+
+        <!-- FOOTER STRUK -->
+        <div class="text-center" style="margin-top: 10px; font-size: 12px;">
+            *** TERIMA KASIH ***<br>
+            Selamat Menikmati
+            <br><br>
+        </div>
     </div>
 
-    <div class="row bold" style="font-size: 14px; margin-top: 4px;">
-        <span>Total Harga:</span>
-        <span id="total_harga">Rp 0</span>
-    </div>
-    <div class="row"><span>Total Bayar:</span><span id="total_bayar">Rp 0</span></div>
-    <div class="row"><span>Kembalian:</span><span id="kembalian">Rp 0</span></div>
-
-    <div class="line"></div>
-
-    <div class="text-center" style="margin-top: 10px;">
-        *** TERIMA KASIH ***<br>
-        Selamat Menikmati
-    </div>
-
-    <div class="no-print text-center" style="margin-top: 20px;">
-        <button onclick="cetakBluetooth()" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">Cetak Struk Auto</button>
+    <!-- TOMBOL CETAK MANUAL -->
+    <div class="button-container">
+        <button class="btn" onclick="cetakSebagaiGambar()">Cetak Struk</button>
     </div>
 
     <script>
+    // 1. Ambil Parameter dari URL
     const params = new URLSearchParams(window.location.search);
 
     const orderId = params.get('order_id') || params.get('id') || '-';
@@ -120,10 +168,9 @@
     document.getElementById('total_bayar').innerText = formatRupiah(totalBayarVal);
     document.getElementById('kembalian').innerText = formatRupiah(kembalianVal);
 
-    // Render Items
+    // 2. Render Rincian Pesanan
     const itemsParam = params.get('items');
     const itemsContainer = document.getElementById('items-container');
-    let textItemsForRawBT = '';
 
     if (itemsParam && itemsContainer) {
         const itemsList = itemsParam.split(',');
@@ -136,14 +183,12 @@
                 const qty = parts[1].trim();
                 const subtotalItem = parts[2].trim();
 
-                textItemsForRawBT += `${nama}\n  ${qty} x ${formatRupiah(subtotalItem)}\n`;
-
                 const div = document.createElement('div');
                 div.style.marginBottom = '4px';
                 div.innerHTML = `
-                    <div>${nama}</div>
+                    <div class="item-title">${nama}</div>
                     <div class="item-row">
-                        <span>  ${qty} x</span>
+                        <span>${qty} x</span>
                         <span>${formatRupiah(subtotalItem)}</span>
                     </div>
                 `;
@@ -152,40 +197,27 @@
         });
     }
 
-    // Fungsi Pengiriman Cetak ke RawBT
-    function cetakBluetooth() {
-        let textToPrint = "";
-        textToPrint += "AYAM BAKAR AROMA\n";
-        textToPrint += "Nota Pembayaran\n";
-        textToPrint += "--------------------------------\n";
-        textToPrint += `No. Order: ${orderId}\n`;
-        textToPrint += `Tanggal  : ${tanggalStr}\n`;
-        textToPrint += `Pelanggan: ${pelanggan}\n`;
-        textToPrint += `Metode   : ${metode}\n`;
-        textToPrint += "--------------------------------\n";
-        textToPrint += "Rincian Pesanan:\n";
-        textToPrint += textItemsForRawBT;
-        textToPrint += "--------------------------------\n";
-        textToPrint += `Subtotal   : ${formatRupiah(subtotalVal)}\n`;
-        if (potonganVal > 0) {
-            textToPrint += `Potongan   : -${formatRupiah(potonganVal)}\n`;
-        }
-        textToPrint += `Total Harga: ${formatRupiah(totalHargaVal)}\n`;
-        textToPrint += `Total Bayar: ${formatRupiah(totalBayarVal)}\n`;
-        textToPrint += `Kembalian  : ${formatRupiah(kembalianVal)}\n`;
-        textToPrint += "--------------------------------\n";
-        textToPrint += "       *** TERIMA KASIH ***\n";
-        textToPrint += "        Selamat Menikmati\n\n\n\n";
-    
-        // Kirim Teks Langsung (Bukan Base64) agar RPP02N Langsung Mencetak Karakter Teks
-        window.location.href = "rawbt:text/" + encodeURIComponent(textToPrint);
+    // 3. Konversi Ke Gambar & Kirim Ke RawBT
+    function cetakSebagaiGambar() {
+        const element = document.getElementById('receipt-area');
+        
+        html2canvas(element, { 
+            scale: 2,           // Meningkatkan ketajaman tulisan
+            backgroundColor: "#ffffff" 
+        }).then(canvas => {
+            // Ambil data Base64 gambar PNG
+            const imgData = canvas.toDataURL("image/png").replace(/^data:image\/(png|jpg);base64,/, "");
+            
+            // Kirim data Gambar ke RawBT
+            window.location.href = "intent:#Intent;scheme=rawbt;package=ru.a404m.rawbtprint;S.base64=" + imgData + ";end;";
+        });
     }
 
-    // Eksekusi otomatis saat halaman dibuka dari AppSheet
+    // 4. Eksekusi Otomatis Setelah Halaman Siap
     window.onload = function() {
         setTimeout(() => {
-            cetakBluetooth();
-        }, 600);
+            cetakSebagaiGambar();
+        }, 1000);
     };
     </script>
 </body>
