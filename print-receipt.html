@@ -175,10 +175,10 @@
         textToPrint += `Kembalian  : ${formatRupiah(kembalianVal)}\n`;
         textToPrint += "--------------------------------\n";
         textToPrint += "       *** TERIMA KASIH ***\n";
-        textToPrint += "        Selamat Menikmati\n\n\n";
-
-        // Mengarahkan ke protokol rawbt untuk cetak otomatis tanpa dialog
-        window.location.href = "rawbt:base64," + btoa(unescape(encodeURIComponent(textToPrint)));
+        textToPrint += "        Selamat Menikmati\n\n\n\n";
+    
+        // Kirim Teks Langsung (Bukan Base64) agar RPP02N Langsung Mencetak Karakter Teks
+        window.location.href = "rawbt:text/" + encodeURIComponent(textToPrint);
     }
 
     // Eksekusi otomatis saat halaman dibuka dari AppSheet
