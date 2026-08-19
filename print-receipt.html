@@ -8,9 +8,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* CSS Disesuaikan 100% Persis Dengan Layout Asli Anda */
-        @page {
-            size: 80mm auto;
-            margin: 0;
+        #receipt-area {
+            width: 576px !important; /* Standar lebar piksel kertas 80mm */
+            padding: 15px;
+            background: #fff;
+            box-sizing: border-box;
         }
 
         * {
@@ -202,13 +204,11 @@
         const element = document.getElementById('receipt-area');
     
         html2canvas(element, { 
-            scale: 2,           
+            width: 576,         // Lebar presisi kertas 80mm
+            scale: 1,           // Menjaga ukuran piksel tetap stabil 1:1
             backgroundColor: "#ffffff" 
         }).then(canvas => {
-            // Ambil data Base64 gambar PNG
             const imgData = canvas.toDataURL("image/png").replace(/^data:image\/(png|jpg);base64,/, "");
-            
-            // Panggil RawBT dengan Skema URL Langsung
             window.location.href = "rawbt:base64/" + imgData;
         });
     }
