@@ -27,26 +27,21 @@
         .item-row { display: flex; justify-content: space-between; font-size: 12px; padding-left: 10px; }
         .item-title { font-weight: bold; margin-top: 5px; }
         
-        /* Area Tombol */
         .btn-container {
             margin-top: 25px;
             text-align: center;
         }
         .btn-cetak {
-            background-color: #007bff;
+            background-color: #28a745;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            padding: 14px 28px;
+            padding: 16px 32px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 400px;
-        }
-        .btn-cetak:active {
-            background-color: #0056b3;
         }
     </style>
 </head>
@@ -88,9 +83,8 @@
         </div>
     </div>
 
-    <!-- TOMBOL UNTUK MEMICU RAWBT DI IN-APP BROWSER -->
     <div class="btn-container">
-        <button class="btn-cetak" onclick="prosesCetakJPG()">CETAK KE PRINTER</button>
+        <button class="btn-cetak" onclick="prosesCetakDirect()">KLIK DI SINI UNTUK MENCETAK</button>
     </div>
 
     <script>
@@ -139,22 +133,17 @@
         });
     }
 
-    // FUNGSI UTAMA CETAK JPG
-    function prosesCetakJPG() {
+    // PEMICU DIRECT SCHEME RAWBT (Mencegah terlempar ke Play Store)
+    function prosesCetakDirect() {
         const element = document.getElementById('receipt-area');
         
         html2canvas(element, { scale: 1.5, backgroundColor: "#ffffff" }).then(canvas => {
             const imgData = canvas.toDataURL("image/jpeg", 0.9).replace(/^data:image\/(jpeg|jpg);base64,/, "");
             
-            // Pemicu berbasis Gesture Klik Pengguna (Bisa menembus proteksi In-App Browser)
-            window.location.href = "intent:#Intent;scheme=rawbt;package=ru.a404m.rawbtprint;S.base64=" + imgData + ";end;";
+            // Menggunakan skema rawbt langsung tanpa menyebut nama package Play Store
+            window.location.href = "rawbt:base64/" + imgData;
         });
     }
-
-    // Mencoba jalankan otomatis terlebih dahulu
-    window.onload = function() {
-        setTimeout(prosesCetakJPG, 1200);
-    };
     </script>
 </body>
 </html>
