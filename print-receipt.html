@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk Pembayaran - Ayam Bakar Aroma</title>
+    <title>Struk Pembayaran - Ayam Bakar Aroma (USB Print)</title>
+    <!-- Library untuk Screenshot Layout & Koneksi USB via QZ Tray -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.2.4/qz-tray.min.js"></script>
+    
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -20,7 +23,6 @@
             background: #fff;
             margin: 0 auto;
             border: 1px solid #ccc;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .text-center { text-align: center; }
         .bold { font-weight: bold; }
@@ -29,40 +31,22 @@
         .item-row { display: flex; justify-content: space-between; font-size: 12px; padding-left: 10px; }
         .item-title { font-weight: bold; margin-top: 5px; }
         
-        .btn-container {
-            margin: 20px auto;
-            text-align: center;
+        .status-box {
             max-width: 500px;
-        }
-        .btn-download {
-            background-color: #28a745;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-        }
-        .btn-download:active {
-            background-color: #1e7e34;
-        }
-        .info-box {
-            background-color: #e9ecef;
-            border-left: 4px solid #17a2b8;
-            padding: 10px 15px;
             margin: 15px auto;
-            max-width: 500px;
+            padding: 10px;
+            text-align: center;
             font-family: sans-serif;
-            font-size: 13px;
-            color: #333;
-            border-radius: 4px;
+            font-weight: bold;
+            border-radius: 5px;
+            background-color: #e2e3e5;
+            color: #383d41;
         }
     </style>
 </head>
 <body>
+
+    <div id="status" class="status-box">Menghubungkan ke QZ Tray...</div>
 
     <div id="receipt-area">
         <div class="text-center bold" style="font-size: 18px;">AYAM BAKAR AROMA</div>
@@ -100,15 +84,11 @@
         </div>
     </div>
 
-    <div class="info-box">
-        📸 <b>Mode Simpan Gambar:</b> File gambar JPG akan tersimpan otomatis ke HP/Galeri Anda.
-    </div>
-
-    <div class="btn-container">
-        <button class="btn-download" onclick="simpanGambarJPG()">UNDUH GAMBAR STRUK (JPG)</button>
-    </div>
-
     <script>
+    // ** PENGATURAN NAMA PRINTER USB ANDA **
+    // Ganti teks 'RPP02N' sesuai nama printer Anda di 'Control Panel -> Devices and Printers' Windows
+    const PRINTER_NAME_USB = "RPP02N"; 
+
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('order_id') || params.get('id') || 'STRUK';
     const tanggalStr = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
@@ -154,19 +134,51 @@
         });
     }
 
-    function simpanGambarJPG() {
-        const element = document.getElementById('receipt-area');
-        html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `Struk_${orderId}.jpg`;
-            link.href = canvas.toDataURL("image/jpeg", 0.95);
-            link.click();
-        });
+    // FUNGSI OTOMATIS CETAK KE USB VIA QZ TRAY
+    async function prosesCetakUSB() {
+        const statusDiv = document.getElementById('status');
+        try {
+            // 1. Hubungkan ke QZ Tray
+            if (!qz.websocket.isActive()) {
+                await qz.websocket.connect();
+            }
+            statusDiv.innerText = "Terhubung ke QZ Tray. Memproses cetak...";
+            statusDiv.style.backgroundColor = "#cce5ff";
+
+            // 2. Render layout HTML struk menjadi Image Canvas
+            const element = document.getElementById('receipt-area');
+            const canvas = await html2canvas(element, { scale: 1.5, backgroundColor: "#ffffff" });
+            const imgBase64 = canvas.toDataURL("image/png");
+
+            // 3. Konfigurasi Printer USB & Data Perintah Cetak
+            const config = qz.configs.create(PRINTER_NAME_USB);
+            const printData = [{
+                type: 'pixel',
+                format: 'image',
+                flavor: 'base64',
+                data: imgBase64
+            }];
+
+            // 4. Kirim langsung ke Printer USB
+            await qz.print(config, printData);
+            statusDiv.innerText = "✅ Struk Berhasil Dicetak!";
+            statusDiv.style.backgroundColor = "#d4edda";
+            statusDiv.style.color = "#155724";
+
+            // Tutup tab otomatis setelah 2 detik
+            setTimeout(() => { window.close(); }, 2000);
+
+        } catch (err) {
+            console.error(err);
+            statusDiv.innerText = "❌ Gagal Cetak: Pastikan QZ Tray berjalan & nama printer sesuai!";
+            statusDiv.style.backgroundColor = "#f8d7da";
+            statusDiv.style.color = "#721c24";
+        }
     }
 
-    // Auto download saat halaman dimuat
+    // Jalankan otomatis saat halaman dibuka dari AppSheet Web
     window.onload = function() {
-        setTimeout(simpanGambarJPG, 1000);
+        setTimeout(prosesCetakUSB, 1000);
     };
     </script>
 </body>
