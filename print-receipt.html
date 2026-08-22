@@ -39,6 +39,23 @@
             justify-content: space-between;
             font-size: 12px;
         }
+        /* Style Gambar Logo Header */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .logo-container img {
+            max-width: 120px;
+            height: auto;
+        }
+        /* Style Status Makan Di Tempat / Bungkus */
+        .makan-di-status {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin: 6px 0;
+        }
         /* Sembunyikan tombol saat mencetak */
         @media print {
             .no-print { display: none; }
@@ -47,8 +64,16 @@
 </head>
 <body>
 
-    <div class="text-center bold" style="font-size: 16px;">AYAM BAKAR AROMA</div>
+    <!-- 1. Gambar Logo Menggantikan Teks Nama Toko -->
+    <div class="logo-container">
+        <!-- GANTI URL GAMBAR DI BAWAH DENGAN URL LOGO ANDA -->
+        <img src="https://via.placeholder.com/150x80?text=LOGO+ANDA" alt="Logo Ayam Bakar Aroma">
+    </div>
     <div class="text-center" style="font-size: 12px;">Nota Pembayaran</div>
+    
+    <!-- 2. Teks Makan Di (Bungkus / Di Tempat) -->
+    <div id="makan_di_container" class="makan-di-status" style="display: none;"></div>
+
     <div class="line"></div>
 
     <div class="row">
@@ -112,14 +137,22 @@
     <script>
     const params = new URLSearchParams(window.location.search);
 
-    // 1. Ambil No. Order
+    // Render Status Makan Di / Bungkus
+    const makanDiVal = params.get('makan_di');
+    if (makanDiVal) {
+        const makanDiEl = document.getElementById('makan_di_container');
+        makanDiEl.innerText = `- ${makanDiVal.toUpperCase()} -`;
+        makanDiEl.style.display = 'block';
+    }
+
+    // Ambil No. Order
     const orderId = params.get('order_id') || params.get('id') || '-';
     if(document.getElementById('order_id')) document.getElementById('order_id').innerText = orderId;
 
-    // 2. Tanggal & Waktu
+    // Tanggal & Waktu
     document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
 
-    // 3. Pelanggan & Metode
+    // Pelanggan & Metode
     document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
     document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
 
@@ -129,7 +162,7 @@
         return 'Rp ' + val.toLocaleString('id-ID');
     }
 
-    // 4. Render Subtotal, Promo & Total
+    // Render Subtotal, Promo & Total
     const subtotalVal = parseInt(params.get('subtotal')) || 0;
     const potonganVal = parseInt(params.get('potongan')) || 0;
     const namaPromo = params.get('nama_promo') || '';
@@ -150,7 +183,7 @@
     document.getElementById('total_bayar').innerText = formatRupiah(params.get('total_bayar'));
     document.getElementById('kembalian').innerText = formatRupiah(params.get('kembalian'));
 
-    // 5. Render Rincian Barang
+    // Render Rincian Barang
     const itemsParam = params.get('items');
     const itemsContainer = document.getElementById('items-container');
 
