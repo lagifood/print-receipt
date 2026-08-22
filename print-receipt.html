@@ -137,11 +137,11 @@
     <script>
     const params = new URLSearchParams(window.location.search);
 
-    // Render Status Makan Di / Bungkus
-    const makanDiVal = params.get('makan_di');
-    if (makanDiVal) {
+    // Render Status Hanya Jika BUNGKUS
+    const makanDiVal = (params.get('makan_di') || '').trim().toLowerCase();
+    if (makanDiVal.includes('bungkus')) {
         const makanDiEl = document.getElementById('makan_di_container');
-        makanDiEl.innerText = `- ${makanDiVal.toUpperCase()} -`;
+        makanDiEl.innerText = `- BUNGKUS -`;
         makanDiEl.style.display = 'block';
     }
 
