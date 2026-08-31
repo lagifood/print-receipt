@@ -157,9 +157,10 @@
     document.getElementById('tanggal').innerText = (params.get('tanggal') || '') + ' ' + (params.get('waktu') || '');
 
     // Pelanggan & Metode
-    document.getElementById('pelanggan').innerText = params.get('pelanggan') || 'OK';
+    document.getElementById('pelanggan').innerText = params.get('pelanggan') || '-';
+    document.getElementById('pemesanan').innerText = params.get('pemesanan') || '-';
     document.getElementById('metode').innerText = params.get('metode') || 'Tunai';
-
+    
     // Format Rupiah Helper
     function formatRupiah(angka) {
         const val = parseInt(angka) || 0;
