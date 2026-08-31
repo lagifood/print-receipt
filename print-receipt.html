@@ -153,9 +153,8 @@
         makanDiEl.style.display = 'block';
     }
 
-    // Ambil No. Order
-    const urlParams = new URLSearchParams(window.location.search);
-    const kasir = urlParams.get('kasir') || '-';
+    // Ambil No. Order & Kasir
+    document.getElementById('kasir').innerText = params.get('kasir') || '-';
     const orderId = params.get('order_id') || params.get('id') || '-';
     if(document.getElementById('order_id')) document.getElementById('order_id').innerText = orderId;
 
