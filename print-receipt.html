@@ -77,6 +77,10 @@
     <div id="makan_di_container" class="makan-di-status" style="display: none;"></div>
 
     <div class="row">
+        <span>Kasir:</span>
+        <span id="kasir">-</span>
+    </div>
+    <div class="row">
         <span>No. Order:</span>
         <span id="order_id">-</span>
     </div>
@@ -150,6 +154,8 @@
     }
 
     // Ambil No. Order
+    const urlParams = new URLSearchParams(window.location.search);
+    const kasir = urlParams.get('kasir') || '-';
     const orderId = params.get('order_id') || params.get('id') || '-';
     if(document.getElementById('order_id')) document.getElementById('order_id').innerText = orderId;
 
